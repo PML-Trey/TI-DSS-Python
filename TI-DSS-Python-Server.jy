@@ -1,0 +1,92 @@
+import Pyro4
+import os
+import time
+import threading
+from java.lang import *
+from java.util import *
+from com.ti.debug.engine.scripting import *
+from com.ti.ccstudio.scripting.environment import *
+
+def startNS():
+    os.system("jython -m Pyro4.naming")
+
+
+@Pyro4.expose
+class TIDebug:
+
+    def __init__(self):
+        self.script = ScriptingEnvironment.instance()
+        self.script.setScriptTimeout(-1)
+        self.debugServer = self.script.getServer("DebugServer.1")
+        self.debugSession = {}
+
+    def setTimeout(self, timeout):
+        self.script.setScriptTimeout(timeout)
+
+    def setConfig(self, targetConfig):
+        self.debugServer.setConfig(targetConfig)
+
+    def startDebugSession(self, sessionName):
+        self.debugSession[sessionName]=self.debugServer.openSession(sessionName)
+        return sessionName
+
+    def connectTarget(self, sessionName):
+        self.debugSession[sessionName].target.connect()
+
+    def disconnectTarget(self, sessionName):
+        self.debugSession[sessionName].target.disconnect()
+
+    def loadProgram(self, sessionName, applicationPath):
+        self.debugSession[sessionName].memory.loadProgram(applicationPath)
+
+    def getSymbolAddress(self, sessionName, symbolName):
+        return self.debugSession[sessionName].getAddress(symbolName)
+
+    def addBreakpoint(self, sessionName, breakpointAddress)
+        self.debugSession[sessionName].breakpoint.add(breakpointAddress)
+
+    def evalExpression(self, sessionName, expression)
+        return self.debugSession[sessionName].expression.evaluate(expression)
+
+    def runTarget(self, sessionName)
+        self.debugSession[sessionName].target.run()
+
+    def runAsyncTarget(self, sessionName)
+        self.debugSession[sessionName].target.runAsynch()
+
+    def resetTarget(self, sessionName)
+        self.debugSession[sessionName].target.reset()
+
+    def restartTarget(self, sessionName)
+        self.debugSession[sessionName].target.restart()
+
+    def haltTarget(self, sessionName)
+        self.debugSession[sessionName].target.halt()
+
+    def isHalted(self, sessionName)
+        return self.debugSession[sessionName].target.isHalted()
+
+    def waitForHalt(self, sessionName)
+        return self.debugSession[sessionName].target.waitForHalt()
+
+    def endDebugSession(self, sessionName):
+        self.debugSession[sessionName].terminate()
+        del self.debugSession[sessionName]
+
+    def stopDebugServer(self):
+        self.debugServer.stop()
+
+
+
+
+daemon = Pyro4.Daemon()                # make a Pyro daemon
+nsThread = threading.Thread(target=startNS)
+nsThread.start()
+time.sleep(0.5)
+ns = Pyro4.locateNS()                  # find the name server
+uri = daemon.register(TIDebug)   # register the greeting maker as a Pyro object
+ns.register("dss", uri)   # register the object with a name in the name server\
+
+print("Ready.")
+daemon.requestLoop()                   # start the event loop of the server to wait for calls
+
