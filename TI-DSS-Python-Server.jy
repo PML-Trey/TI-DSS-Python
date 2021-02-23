@@ -42,31 +42,31 @@ class TIDebug:
     def getSymbolAddress(self, sessionName, symbolName):
         return self.debugSession[sessionName].getAddress(symbolName)
 
-    def addBreakpoint(self, sessionName, breakpointAddress)
+    def addBreakpoint(self, sessionName, breakpointAddress):
         self.debugSession[sessionName].breakpoint.add(breakpointAddress)
 
-    def evalExpression(self, sessionName, expression)
+    def evalExpression(self, sessionName, expression):
         return self.debugSession[sessionName].expression.evaluate(expression)
 
-    def runTarget(self, sessionName)
+    def runTarget(self, sessionName):
         self.debugSession[sessionName].target.run()
 
-    def runAsyncTarget(self, sessionName)
+    def runAsyncTarget(self, sessionName):
         self.debugSession[sessionName].target.runAsynch()
 
-    def resetTarget(self, sessionName)
+    def resetTarget(self, sessionName):
         self.debugSession[sessionName].target.reset()
 
-    def restartTarget(self, sessionName)
+    def restartTarget(self, sessionName):
         self.debugSession[sessionName].target.restart()
 
-    def haltTarget(self, sessionName)
+    def haltTarget(self, sessionName):
         self.debugSession[sessionName].target.halt()
 
-    def isHalted(self, sessionName)
+    def isHalted(self, sessionName):
         return self.debugSession[sessionName].target.isHalted()
 
-    def waitForHalt(self, sessionName)
+    def waitForHalt(self, sessionName):
         return self.debugSession[sessionName].target.waitForHalt()
 
     def endDebugSession(self, sessionName):
